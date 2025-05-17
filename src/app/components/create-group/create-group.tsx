@@ -22,7 +22,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ArrowRightIcon } from 'lucide-react';
 import { z } from 'zod';
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,6 +31,11 @@ import {
 	InputOTPGroup,
 	InputOTPSlot,
 } from '@/components/ui/input-otp';
+import { createClient } from '@/lib/supabase/client';
+import { Group, GroupMember } from '@/app/models/Group';
+import { getRandomId } from '@/lib/string/string';
+import { getTodaysDate } from '@/lib/date/date';
+import { toast } from 'sonner';
 
 const formSchema = z.object({
 	groupName: z.string().min(2).max(50),
@@ -40,6 +45,8 @@ const formSchema = z.object({
 });
 
 const CreateGroup = () => {
+	const [loading, setLoading] = useState(false);
+
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -50,8 +57,56 @@ const CreateGroup = () => {
 		},
 	});
 
-	const onSubmit = (values: z.infer<typeof formSchema>) => {
-		console.log(values);
+	const onSubmit = async (values: z.infer<typeof formSchema>) => {
+		try {
+			setLoading(true);
+			const supabase = createClient();
+
+			const newGroup: Group = {
+				id: getRandomId(),
+				name: values.groupName,
+				description: values.groupDescription,
+				created_at: getTodaysDate(),
+				updated_at: getTodaysDate(),
+			};
+
+			if (values.passcode) {
+				newGroup.passcode = values.passcode;
+			}
+
+			const { error } = await supabase.from('groups').insert(newGroup).single();
+
+			if (error) {
+				throw new Error(error.message);
+			}
+
+			const newGroupMember: GroupMember = {
+				id: getRandomId(),
+				name: values.yourName,
+				group_id: newGroup.id,
+				created_at: getTodaysDate(),
+				updated_at: getTodaysDate(),
+			};
+
+			const { error: groupMemberError } = await supabase
+				.from('group_members')
+				.insert(newGroupMember)
+				.single();
+
+			if (groupMemberError) {
+				throw new Error(groupMemberError.message);
+			}
+
+			toast.success('Group created successfully');
+		} catch (error) {
+			if (error instanceof Error) {
+				toast.error('Failed to create group: ' + error.message);
+			} else {
+				toast.error('Failed to create group');
+			}
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	return (
@@ -150,11 +205,13 @@ const CreateGroup = () => {
 								/>
 							</div>
 						</div>
+						<DialogFooter>
+							<Button loading={loading} type='submit'>
+								Create
+							</Button>
+						</DialogFooter>
 					</form>
 				</Form>
-				<DialogFooter>
-					<Button>Create</Button>
-				</DialogFooter>
 			</DialogContent>
 		</Dialog>
 	);

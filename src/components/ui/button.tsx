@@ -3,6 +3,7 @@ import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
+import ButtonIcons from './button-icons';
 
 const buttonVariants = cva(
 	'inline-flex gap-2 items-center justify-center whitespace-nowrap text-sm font-medium focus-visible:outline-none focus-visible:border focus-visible:border-secondary disabled:pointer-events-none disabled:opacity-50 transition-opacity group w-full sm:w-auto',
@@ -39,20 +40,46 @@ function Button({
 	className,
 	variant,
 	size,
+	loading = false,
 	asChild = false,
+	iconLeft,
+	iconRight,
 	...props
 }: React.ComponentProps<'button'> &
 	VariantProps<typeof buttonVariants> & {
 		asChild?: boolean;
+		loading?: boolean;
+		iconLeft?: React.ReactElement;
+		iconRight?: React.ReactElement;
 	}) {
 	const Comp = asChild ? Slot : 'button';
 
 	return (
 		<Comp
-			data-slot='button'
-			className={cn(buttonVariants({ variant, size, className }))}
+			className={cn(buttonVariants({ variant, size }), className)}
+			disabled={loading}
 			{...props}
-		/>
+		>
+			{Comp === 'button' ? (
+				<>
+					<ButtonIcons
+						direction='left'
+						loading={loading && !iconRight}
+						icon={iconLeft}
+						buttonSizeIsIcon={size === 'icon'}
+					/>
+					{props.children}
+					<ButtonIcons
+						direction='right'
+						loading={loading && !!iconRight}
+						icon={iconRight}
+						buttonSizeIsIcon={size === 'icon'}
+					/>
+				</>
+			) : (
+				props.children
+			)}
+		</Comp>
 	);
 }
 
