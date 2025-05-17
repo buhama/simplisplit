@@ -3,6 +3,76 @@ import Typewriter from '@/fancy/components/text/typewriter';
 import CreateGroup from '../components/create-group/create-group';
 import { ArrowRightIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+	title: 'SimpliSplit - Split Bills with Friends',
+	description:
+		'Track shared expenses effortlessly, collect debts drama-free, and never have awkward money talks again. The simplest way to split bills with friends.',
+	keywords: [
+		'bill splitting',
+		'expense sharing',
+		'group expenses',
+		'debt tracking',
+		'payment splitting',
+		'shared expenses',
+	],
+	authors: [{ name: 'SimpliSplit Team' }],
+	creator: 'SimpliSplit',
+	publisher: 'SimpliSplit',
+	formatDetection: {
+		email: false,
+		address: false,
+		telephone: false,
+	},
+	metadataBase: new URL('https://simplisplit.com'),
+	openGraph: {
+		type: 'website',
+		locale: 'en_US',
+		url: 'https://simplisplit.com',
+		title: 'SimpliSplit - Split Bills with Friends',
+		description:
+			'Track shared expenses effortlessly, collect debts drama-free, and never have awkward money talks again.',
+		siteName: 'SimpliSplit',
+		images: [
+			{
+				url: '/preview-image.png',
+				width: 1200,
+				height: 630,
+				alt: 'SimpliSplit - Split your bills with friends',
+			},
+		],
+	},
+	twitter: {
+		card: 'summary_large_image',
+		title: 'SimpliSplit - Split Bills with Friends',
+		description:
+			'Track shared expenses effortlessly, collect debts drama-free, and never have awkward money talks again.',
+		creator: '@simplisplit',
+		images: ['/preview-image.png'],
+	},
+	viewport: {
+		width: 'device-width',
+		initialScale: 1,
+		maximumScale: 1,
+	},
+	robots: {
+		index: true,
+		follow: true,
+		googleBot: {
+			index: true,
+			follow: true,
+			'max-video-preview': -1,
+			'max-image-preview': 'large',
+			'max-snippet': -1,
+		},
+	},
+	icons: {
+		icon: '/favicon.ico',
+		shortcut: '/favicon.ico',
+		apple: '/favicon.ico',
+	},
+};
 
 export default function Home() {
 	return (
