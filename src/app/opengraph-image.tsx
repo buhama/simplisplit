@@ -1,6 +1,4 @@
 import { ImageResponse } from 'next/og';
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
 
 // Image metadata
 export const alt = 'SimpliSplit - Split your bills with friends';
@@ -13,14 +11,6 @@ export const contentType = 'image/png';
 
 // Image generation
 export default async function Image() {
-	// Font loading
-	const interSemiBold = await readFile(
-		join(
-			process.cwd(),
-			'node_modules/@fontsource/inter/files/inter-latin-600-normal.woff'
-		)
-	);
-
 	return new ImageResponse(
 		(
 			<div
@@ -53,6 +43,8 @@ export default async function Image() {
 							color: '#047857', // emerald-700
 							margin: 0,
 							lineHeight: 1.2,
+							fontFamily:
+								'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
 						}}
 					>
 						Split your bills with friends
@@ -62,7 +54,8 @@ export default async function Image() {
 							fontSize: '32px',
 							color: '#047857', // emerald-700
 							margin: 0,
-							fontFamily: 'monospace',
+							fontFamily:
+								'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
 						}}
 					>
 						Track shared expenses effortlessly
@@ -72,7 +65,8 @@ export default async function Image() {
 							fontSize: '32px',
 							color: '#047857', // emerald-700
 							margin: 0,
-							fontFamily: 'monospace',
+							fontFamily:
+								'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
 						}}
 					>
 						Drama free debt collection always
@@ -82,14 +76,6 @@ export default async function Image() {
 		),
 		{
 			...size,
-			fonts: [
-				{
-					name: 'Inter',
-					data: interSemiBold,
-					style: 'normal',
-					weight: 600,
-				},
-			],
 		}
 	);
 }
