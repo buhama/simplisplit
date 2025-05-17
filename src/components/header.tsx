@@ -28,14 +28,14 @@ const Header = () => {
 								</Link>
 								<div className='h-px w-full sm:h-4 sm:w-px border-r border-dashed border-gray-400 mx-1.5 opacity-50'></div>
 								<Link
-									href='/pricing'
+									href='/about'
 									className='text-sm text-gray-700 hover:text-emerald-900 transition-colors flex items-center gap-1.5'
 								>
-									<GroupIcon size={14} /> Careers
+									<GroupIcon size={14} /> About
 								</Link>
 								<div className='h-px w-full sm:h-4 sm:w-px border-r border-dashed border-gray-400 mx-1.5 opacity-50'></div>
 								<Link
-									href='/pricing'
+									href='/resources'
 									className='text-sm text-gray-700 hover:text-emerald-900 transition-colors flex items-center gap-1.5'
 								>
 									<BookIcon size={14} /> Resources
