@@ -44,7 +44,7 @@ export const metadata: Metadata = {
 		siteName: 'SimpliSplit',
 		images: [
 			{
-				url: '/opengraph-image',
+				url: '/preview-image.png',
 				width: 1200,
 				height: 630,
 				alt: 'SimpliSplit - Split your bills with friends',
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
 		description:
 			'Track shared expenses effortlessly, collect debts drama-free, and never have awkward money talks again.',
 		creator: '@simplisplit',
-		images: ['/twitter-image'],
+		images: ['/preview-image.png'],
 	},
 	viewport: {
 		width: 'device-width',
