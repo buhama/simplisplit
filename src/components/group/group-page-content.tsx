@@ -12,6 +12,7 @@ import * as RechartsPrimitive from 'recharts';
 import JoinGroupContent from './join-group-content';
 import { motion } from 'framer-motion';
 import { ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
+import { TransferMember } from './transfer-member';
 
 interface GroupPageContentProps {
 	group: Group;
@@ -253,6 +254,12 @@ export function GroupPageContent({
 										</p>
 									</div>
 								</div>
+								{localMember && (
+									<TransferMember
+										groupId={group.id}
+										memberId={localMember.memberId}
+									/>
+								)}
 							</div>
 						</div>
 					</motion.div>
