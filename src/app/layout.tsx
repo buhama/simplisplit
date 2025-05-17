@@ -33,11 +33,11 @@ export const metadata: Metadata = {
 		address: false,
 		telephone: false,
 	},
-	metadataBase: new URL('https://simplisplit.com'),
+	metadataBase: new URL('https://simplisplit.ca'),
 	openGraph: {
 		type: 'website',
 		locale: 'en_US',
-		url: 'https://simplisplit.com',
+		url: 'https://simplisplit.ca',
 		title: 'SimpliSplit - Split Bills with Friends',
 		description:
 			'Track shared expenses effortlessly, collect debts drama-free, and never have awkward money talks again.',
