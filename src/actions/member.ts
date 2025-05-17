@@ -26,8 +26,9 @@ export async function inviteMember({ groupId, name }: InviteMemberParams) {
 
 	// Create the member
 	const now = getTodaysDate();
+	const memberId = getRandomId();
 	const { error: memberError } = await supabase.from('group_members').insert({
-		id: getRandomId(),
+		id: memberId,
 		group_id: groupId,
 		name,
 		created_at: now,
@@ -40,4 +41,6 @@ export async function inviteMember({ groupId, name }: InviteMemberParams) {
 
 	// Revalidate the group page
 	revalidatePath(`/group/${groupId}`);
+
+	return { memberId };
 }

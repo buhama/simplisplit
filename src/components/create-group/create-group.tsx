@@ -36,6 +36,8 @@ import { Group, GroupMember } from '@/models/Group';
 import { getRandomId } from '@/lib/string/string';
 import { getTodaysDate } from '@/lib/date/date';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { saveMember } from '@/lib/local-members/local-members';
 
 const formSchema = z.object({
 	groupName: z.string().min(2).max(50),
@@ -46,6 +48,7 @@ const formSchema = z.object({
 
 const CreateGroup = () => {
 	const [loading, setLoading] = useState(false);
+	const router = useRouter();
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -62,8 +65,11 @@ const CreateGroup = () => {
 			setLoading(true);
 			const supabase = createClient();
 
+			// Create group
+			const groupId = getRandomId();
+
 			const newGroup: Group = {
-				id: getRandomId(),
+				id: groupId,
 				name: values.groupName,
 				description: values.groupDescription,
 				created_at: getTodaysDate(),
@@ -80,10 +86,12 @@ const CreateGroup = () => {
 				throw new Error(error.message);
 			}
 
+			// Create member
+			const memberId = getRandomId();
 			const newGroupMember: GroupMember = {
-				id: getRandomId(),
+				id: memberId,
 				name: values.yourName,
-				group_id: newGroup.id,
+				group_id: groupId,
 				created_at: getTodaysDate(),
 				updated_at: getTodaysDate(),
 			};
@@ -97,7 +105,11 @@ const CreateGroup = () => {
 				throw new Error(groupMemberError.message);
 			}
 
+			// Save member info to local storage
+			saveMember(groupId, memberId, values.yourName);
+
 			toast.success('Group created successfully');
+			router.push(`/group/${groupId}`);
 		} catch (error) {
 			if (error instanceof Error) {
 				toast.error('Failed to create group: ' + error.message);
