@@ -4,21 +4,21 @@ import { GroupPageContent } from '@/components/group/group-page-content';
 
 export const dynamic = 'force-dynamic';
 
-interface PageProps {
-	params: {
+export default async function GroupPage({
+	params,
+}: {
+	params: Promise<{
 		groupId: string;
-	};
-	searchParams: { [key: string]: string | string[] | undefined };
-}
-
-const GroupPage = async ({ params }: PageProps) => {
+	}>;
+}) {
+	const { groupId } = await params;
 	const supabase = createSuperAdminClient();
 
 	// Fetch group data
 	const { data: group, error: groupError } = await supabase
 		.from('groups')
 		.select('*')
-		.eq('id', params.groupId)
+		.eq('id', groupId)
 		.single();
 
 	if (groupError || !group) {
@@ -30,7 +30,7 @@ const GroupPage = async ({ params }: PageProps) => {
 	const { data: membersData, error: membersError } = await supabase
 		.from('group_members')
 		.select('*')
-		.eq('group_id', params.groupId);
+		.eq('group_id', groupId);
 
 	if (membersError || !membersData) {
 		console.error(membersError);
@@ -43,7 +43,7 @@ const GroupPage = async ({ params }: PageProps) => {
 	const { data: expensesData, error: expensesError } = await supabase
 		.from('expenses')
 		.select('*')
-		.eq('group_id', params.groupId)
+		.eq('group_id', groupId)
 		.order('created_at', { ascending: false });
 
 	if (expensesError || !expensesData) {
@@ -57,7 +57,7 @@ const GroupPage = async ({ params }: PageProps) => {
 	const { data: settlementsData, error: settlementsError } = await supabase
 		.from('settlements')
 		.select('*')
-		.eq('group_id', params.groupId)
+		.eq('group_id', groupId)
 		.order('created_at', { ascending: false });
 
 	if (settlementsError || !settlementsData) {
@@ -76,5 +76,3 @@ const GroupPage = async ({ params }: PageProps) => {
 		/>
 	);
 };
-
-export default GroupPage;
