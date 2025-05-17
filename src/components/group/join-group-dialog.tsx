@@ -30,6 +30,7 @@ import { inviteMember } from '@/actions/member';
 import { toast } from 'sonner';
 import { Group } from '@/models/Group';
 import { saveMember } from '@/lib/local-members/local-members';
+import { ArrowRightIcon } from 'lucide-react';
 
 const formSchema = z.object({
 	name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -89,26 +90,32 @@ export function JoinGroupDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent>
+			<DialogContent className='font-[family-name:var(--font-geist-sans)]'>
 				<DialogHeader>
-					<DialogTitle>Join {group.name}</DialogTitle>
-					<DialogDescription>
+					<DialogTitle className='text-2xl font-medium '>
+						Join {group.name}
+					</DialogTitle>
+					<DialogDescription className=' font-mono'>
 						Enter your name to join this group.
 						{group.passcode && ' A passcode is required to join.'}
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+					<form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
 						<FormField
 							control={form.control}
 							name='name'
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Your name</FormLabel>
+									<FormLabel className='font-mono'>Your name</FormLabel>
 									<FormControl>
-										<Input placeholder='John Doe' {...field} />
+										<Input
+											placeholder='John Doe'
+											{...field}
+											className='font-mono'
+										/>
 									</FormControl>
-									<FormMessage />
+									<FormMessage className='text-red-500' />
 								</FormItem>
 							)}
 						/>
@@ -118,12 +125,13 @@ export function JoinGroupDialog({
 								name='passcode'
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Passcode</FormLabel>
+										<FormLabel className='font-mono'>Passcode</FormLabel>
 										<FormControl>
 											<InputOTP
 												maxLength={6}
 												value={field.value || ''}
 												onChange={field.onChange}
+												className='gap-2'
 											>
 												<InputOTPGroup>
 													{Array.from({ length: 6 }).map((_, index) => (
@@ -136,14 +144,14 @@ export function JoinGroupDialog({
 												</InputOTPGroup>
 											</InputOTP>
 										</FormControl>
-										<FormMessage />
+										<FormMessage className='text-red-500' />
 									</FormItem>
 								)}
 							/>
 						)}
 						<DialogFooter>
 							<Button type='submit' loading={form.formState.isSubmitting}>
-								Join group
+								Join now <ArrowRightIcon className='ml-2 h-4 w-4' />
 							</Button>
 						</DialogFooter>
 					</form>
