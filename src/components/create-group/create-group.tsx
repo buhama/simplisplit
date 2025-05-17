@@ -20,7 +20,6 @@ import {
 	FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { ArrowRightIcon } from 'lucide-react';
 import { z } from 'zod';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -46,7 +45,11 @@ const formSchema = z.object({
 	passcode: z.string().length(6).optional(),
 });
 
-const CreateGroup = () => {
+interface CreateGroupProps {
+	children: React.ReactNode;
+}
+
+const CreateGroup = ({ children }: CreateGroupProps) => {
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
 
@@ -123,11 +126,7 @@ const CreateGroup = () => {
 
 	return (
 		<Dialog>
-			<DialogTrigger asChild>
-				<Button className='mt-4 font-mono'>
-					Start for free <ArrowRightIcon size={16} />
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger asChild>{children}</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Create a group</DialogTitle>

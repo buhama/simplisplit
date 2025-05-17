@@ -3,6 +3,7 @@ import { BookIcon, DollarSignIcon, GroupIcon, MenuIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
+import CreateGroup from './create-group/create-group';
 
 const Header = () => {
 	return (
@@ -42,12 +43,9 @@ const Header = () => {
 								</Link>
 							</div>
 							<div className='mt-4 flex flex-col items-start space-y-4 sm:mt-0 sm:flex-row sm:items-center sm:space-x-4 sm:space-y-0 sm:ml-8'>
-								<Link
-									href='/login'
-									className='text-sm text-gray-700 hover:text-secondary transition-colors flex items-center gap-1.5'
-								>
+								<CreateGroup>
 									<Button>Create a group</Button>
-								</Link>
+								</CreateGroup>
 							</div>
 						</div>
 					</div>

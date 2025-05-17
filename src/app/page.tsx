@@ -1,6 +1,8 @@
 import Header from '../components/header';
 import Typewriter from '@/fancy/components/text/typewriter';
 import CreateGroup from '../components/create-group/create-group';
+import { ArrowRightIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function Home() {
 	return (
@@ -66,7 +68,11 @@ export default function Home() {
 															cursorChar={'_'}
 														/>
 													</div>
-													<CreateGroup />
+													<CreateGroup>
+														<Button className='mt-4 font-mono'>
+															Start for free <ArrowRightIcon size={16} />
+														</Button>
+													</CreateGroup>
 												</div>
 											</div>
 										</div>
