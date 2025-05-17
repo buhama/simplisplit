@@ -8,12 +8,19 @@ import { GroupHeader } from './group-header';
 import { ActivityFeed } from './activity-feed';
 import { MemberBalances } from './member-balances';
 import { loadLocalMember } from '@/lib/local-members/local-members';
+import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import * as RechartsPrimitive from 'recharts';
 
 interface GroupPageContentProps {
 	group: Group;
 	members: GroupMember[];
 	expenses: Expense[];
 	settlements: Settlement[];
+}
+
+interface MonthlyExpense {
+	month: string;
+	amount: number;
 }
 
 export function GroupPageContent({
@@ -166,6 +173,57 @@ export function GroupPageContent({
 		members.map((member) => [member.id, member])
 	);
 
+	// Calculate total balance and personal balances
+	const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+	const monthlyExpenses = expenses
+		.filter((exp) => {
+			const date = new Date(exp.created_at);
+			const now = new Date();
+			return (
+				date.getMonth() === now.getMonth() &&
+				date.getFullYear() === now.getFullYear()
+			);
+		})
+		.reduce((sum, exp) => sum + exp.amount, 0);
+
+	// Get current user's balances
+	const currentUserBalance = localMember
+		? memberBalances[localMember.memberId]
+		: null;
+	const youOwe = currentUserBalance?.total_owed || 0;
+	const youAreOwed = currentUserBalance?.total_paid || 0;
+
+	// Monthly expense data for chart
+	const monthlyData = expenses.reduce((acc: MonthlyExpense[], exp) => {
+		const date = new Date(exp.created_at);
+		const monthYear = `${date.toLocaleString('default', {
+			month: 'short',
+		})} ${date.getFullYear()}`;
+
+		// Find or create month entry
+		let monthEntry = acc.find((item) => item.month === monthYear);
+		if (!monthEntry) {
+			monthEntry = { month: monthYear, amount: 0 };
+			acc.push(monthEntry);
+		}
+		monthEntry.amount += exp.amount;
+		return acc;
+	}, []);
+
+	// Ensure we have entries for the last 6 months
+	const now = new Date();
+	const last6Months = Array.from({ length: 6 }, (_, i) => {
+		const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+		return `${date.toLocaleString('default', {
+			month: 'short',
+		})} ${date.getFullYear()}`;
+	}).reverse();
+
+	const filledMonthlyData = last6Months.map((month) => ({
+		month,
+		amount: monthlyData.find((data) => data.month === month)?.amount || 0,
+	}));
+
 	return (
 		<div className='min-h-screen bg-gray-50'>
 			<GroupHeader
@@ -174,12 +232,112 @@ export function GroupPageContent({
 				members={members}
 			/>
 			<div className='container mx-auto py-8 px-4'>
-				<div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+				{/* Financial Overview */}
+				<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8'>
+					<div className='bg-white rounded-lg border shadow-sm hover:shadow-md transition-shadow p-6'>
+						<h3 className='text-sm font-medium text-gray-500'>Total Balance</h3>
+						<p className='mt-2 text-3xl font-semibold text-gray-900'>
+							${totalExpenses.toFixed(2)}
+						</p>
+						<p className='text-sm text-gray-500 mt-1'>All time</p>
+					</div>
+					<div className='bg-white rounded-lg border shadow-sm hover:shadow-md transition-shadow p-6'>
+						<h3 className='text-sm font-medium text-gray-500'>
+							Monthly Spending
+						</h3>
+						<p className='mt-2 text-3xl font-semibold text-gray-900'>
+							${monthlyExpenses.toFixed(2)}
+						</p>
+						<p className='text-sm text-gray-500 mt-1'>This month</p>
+					</div>
+					{currentUserBalance && (
+						<>
+							<div className='bg-white rounded-lg border shadow-sm hover:shadow-md transition-shadow p-6'>
+								<h3 className='text-sm font-medium text-gray-500'>
+									You are owed
+								</h3>
+								<p className='mt-2 text-3xl font-semibold text-emerald-600'>
+									${youAreOwed.toFixed(2)}
+								</p>
+								<p className='text-sm text-gray-500 mt-1'>To be collected</p>
+							</div>
+							<div className='bg-white rounded-lg border shadow-sm hover:shadow-md transition-shadow p-6'>
+								<h3 className='text-sm font-medium text-gray-500'>You owe</h3>
+								<p className='mt-2 text-3xl font-semibold text-red-600'>
+									${youOwe.toFixed(2)}
+								</p>
+								<p className='text-sm text-gray-500 mt-1'>To be paid</p>
+							</div>
+						</>
+					)}
+				</div>
+
+				<div className='grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8'>
 					<div className='lg:col-span-2'>
 						<ActivityFeed activities={activities} members={membersById} />
 					</div>
 					<div>
 						<MemberBalances members={membersWithBalances} />
+					</div>
+				</div>
+				{/* Monthly Overview Chart */}
+				<div className='bg-white rounded-lg border shadow-sm p-6 mb-8'>
+					<div className='flex items-center justify-between mb-6'>
+						<h2 className='text-lg font-semibold text-gray-900'>
+							Monthly Overview
+						</h2>
+						<div className='text-sm text-gray-500'>Last 6 months</div>
+					</div>
+					<div className='w-full'>
+						<ChartContainer
+							config={{
+								expenses: {
+									label: 'Monthly Expenses',
+									theme: {
+										light: '#059669',
+										dark: '#059669',
+									},
+								},
+							}}
+						>
+							<RechartsPrimitive.AreaChart
+								data={filledMonthlyData}
+								margin={{ top: 5, right: 5, left: 40, bottom: 20 }}
+							>
+								<RechartsPrimitive.XAxis
+									dataKey='month'
+									tick={{ fill: '#6B7280', fontSize: 11 }}
+									tickLine={{ stroke: '#6B7280' }}
+									axisLine={{ stroke: '#E5E7EB' }}
+									dy={10}
+								/>
+								<RechartsPrimitive.YAxis
+									tick={{ fill: '#6B7280', fontSize: 11 }}
+									tickLine={{ stroke: '#6B7280' }}
+									axisLine={{ stroke: '#E5E7EB' }}
+									tickFormatter={(value) => `$${value}`}
+									width={35}
+								/>
+								<RechartsPrimitive.CartesianGrid
+									strokeDasharray='3 3'
+									stroke='#E5E7EB'
+									opacity={0.5}
+								/>
+								<RechartsPrimitive.Tooltip
+									content={<ChartTooltipContent />}
+									cursor={{ stroke: '#6B7280', strokeWidth: 1 }}
+								/>
+								<RechartsPrimitive.Area
+									type='monotone'
+									dataKey='amount'
+									name='expenses'
+									stroke='#059669'
+									fill='#059669'
+									fillOpacity={0.1}
+									strokeWidth={2}
+								/>
+							</RechartsPrimitive.AreaChart>
+						</ChartContainer>
 					</div>
 				</div>
 			</div>
