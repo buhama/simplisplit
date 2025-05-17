@@ -2,7 +2,6 @@
 
 import { Group, GroupMember } from '@/models/Group';
 import { Balance, Expense, Settlement } from '@/models/Expense';
-import { JoinGroupDialog } from '@/components/group/join-group-dialog';
 import { useState, useEffect } from 'react';
 import { GroupHeader } from './group-header';
 import { ActivityFeed } from './activity-feed';
@@ -10,6 +9,9 @@ import { MemberBalances } from './member-balances';
 import { loadLocalMember } from '@/lib/local-members/local-members';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import * as RechartsPrimitive from 'recharts';
+import JoinGroupContent from './join-group-content';
+import { motion } from 'framer-motion';
+import { ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
 
 interface GroupPageContentProps {
 	group: Group;
@@ -29,7 +31,6 @@ export function GroupPageContent({
 	expenses,
 	settlements,
 }: GroupPageContentProps) {
-	const [showJoinDialog, setShowJoinDialog] = useState(false);
 	const [localMember, setLocalMember] = useState<{
 		memberId: string;
 		name: string;
@@ -49,58 +50,7 @@ export function GroupPageContent({
 
 	// If not a member, show join dialog
 	if (!isMember) {
-		return (
-			<div className='relative flex min-h-screen flex-col font-[family-name:var(--font-geist-sans)]'>
-				<div className='mx-auto w-full max-w-[1920px] px-4 sm:px-6 lg:px-8'>
-					<main className='flex-1'>
-						<div className='flex w-full items-center justify-center'>
-							<div className='w-full max-w-[1500px] min-h-screen flex flex-col'>
-								<div className='border-x border-neutral-100 mx-2 sm:mx-4 md:mx-8 lg:mx-24 xl:mx-32'>
-									<main className='flex w-full flex-col'>
-										<div>
-											<div className='h-full w-full'>
-												<div className='relative min-h-[80vh] w-full pt-12 sm:pt-16'>
-													<div className='absolute left-4 font-mono sm:left-8 top-12 sm:top-16 flex flex-col items-start'>
-														<div>
-															<h1 className='text-6xl sm:text-5xl md:text-7xl lg:text-7xl xl:text-8xl font-medium text-emerald-700 whitespace-pre-line'>
-																{group.name}
-															</h1>
-															{group.description && (
-																<p className='mt-4 text-lg text-emerald-600 font-mono'>
-																	{group.description}
-																</p>
-															)}
-														</div>
-													</div>
-													<div className='absolute bottom-8 left-4 sm:left-8 flex flex-col items-start gap-2'>
-														<div className='text-md sm:text-lg text-emerald-700 font-mono'>
-															Join {members.length} other{' '}
-															{members.length === 1 ? 'member' : 'members'} in
-															tracking shared expenses
-														</div>
-														<button
-															onClick={() => setShowJoinDialog(true)}
-															className='mt-4 font-mono inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-emerald-700 text-white hover:bg-emerald-600 h-10 px-4 py-2'
-														>
-															Join now
-														</button>
-													</div>
-												</div>
-											</div>
-										</div>
-									</main>
-								</div>
-							</div>
-						</div>
-					</main>
-				</div>
-				<JoinGroupDialog
-					group={group}
-					open={showJoinDialog}
-					onOpenChange={setShowJoinDialog}
-				/>
-			</div>
-		);
+		return <JoinGroupContent group={group} members={members} />;
 	}
 
 	// Calculate member balances
@@ -225,119 +175,161 @@ export function GroupPageContent({
 	}));
 
 	return (
-		<div className='min-h-screen bg-gray-50'>
+		<div className='min-h-screen bg-[#fafafa]'>
 			<GroupHeader
 				group={group}
 				totalMembers={members.length}
 				members={members}
 			/>
-			<div className='container mx-auto py-8 px-4'>
-				{/* Financial Overview */}
-				<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8'>
-					<div className='bg-white rounded-lg border shadow-sm hover:shadow-md transition-shadow p-6'>
-						<h3 className='text-sm font-medium text-gray-500'>Total Balance</h3>
-						<p className='mt-2 text-3xl font-semibold text-gray-900'>
-							${totalExpenses.toFixed(2)}
-						</p>
-						<p className='text-sm text-gray-500 mt-1'>All time</p>
-					</div>
-					<div className='bg-white rounded-lg border shadow-sm hover:shadow-md transition-shadow p-6'>
-						<h3 className='text-sm font-medium text-gray-500'>
-							Monthly Spending
-						</h3>
-						<p className='mt-2 text-3xl font-semibold text-gray-900'>
-							${monthlyExpenses.toFixed(2)}
-						</p>
-						<p className='text-sm text-gray-500 mt-1'>This month</p>
-					</div>
-					{currentUserBalance && (
-						<>
-							<div className='bg-white rounded-lg border shadow-sm hover:shadow-md transition-shadow p-6'>
-								<h3 className='text-sm font-medium text-gray-500'>
-									You are owed
-								</h3>
-								<p className='mt-2 text-3xl font-semibold text-emerald-600'>
-									${youAreOwed.toFixed(2)}
-								</p>
-								<p className='text-sm text-gray-500 mt-1'>To be collected</p>
+			<div className='container mx-auto py-8 px-4 max-w-7xl'>
+				{/* Financial Summary */}
+				{currentUserBalance && (
+					<motion.div
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.5 }}
+						className='mb-12'
+					>
+						<div className='flex flex-col md:flex-row gap-8 items-start'>
+							<div className='flex-1 space-y-2'>
+								<h2 className='text-sm font-medium text-gray-500'>
+									Your Balance
+								</h2>
+								<div className='flex items-baseline gap-3'>
+									<p
+										className={`text-4xl font-mono ${
+											currentUserBalance.net_balance >= 0
+												? 'text-emerald-600'
+												: 'text-red-600'
+										}`}
+									>
+										${Math.abs(currentUserBalance.net_balance).toFixed(2)}
+									</p>
+									<div
+										className={`flex items-center gap-1 text-sm ${
+											currentUserBalance.net_balance >= 0
+												? 'text-emerald-600'
+												: 'text-red-600'
+										}`}
+									>
+										{currentUserBalance.net_balance >= 0 ? (
+											<>
+												<ArrowUpIcon className='h-4 w-4' />
+												<span>you are owed</span>
+											</>
+										) : (
+											<>
+												<ArrowDownIcon className='h-4 w-4' />
+												<span>you owe</span>
+											</>
+										)}
+									</div>
+								</div>
 							</div>
-							<div className='bg-white rounded-lg border shadow-sm hover:shadow-md transition-shadow p-6'>
-								<h3 className='text-sm font-medium text-gray-500'>You owe</h3>
-								<p className='mt-2 text-3xl font-semibold text-red-600'>
-									${youOwe.toFixed(2)}
-								</p>
-								<p className='text-sm text-gray-500 mt-1'>To be paid</p>
+							<div className='flex gap-12 items-end text-sm'>
+								<div>
+									<p className='text-gray-500 mb-1'>Monthly Spending</p>
+									<p className='font-mono text-2xl'>
+										${monthlyExpenses.toFixed(2)}
+									</p>
+								</div>
+								<div>
+									<p className='text-gray-500 mb-1'>Total Group Spend</p>
+									<p className='font-mono text-2xl'>
+										${totalExpenses.toFixed(2)}
+									</p>
+								</div>
+								<div className='flex gap-6 text-sm'>
+									<div>
+										<p className='text-gray-500 mb-1'>You&apos;ve Paid</p>
+										<p className='font-mono text-lg text-emerald-600'>
+											${youAreOwed.toFixed(2)}
+										</p>
+									</div>
+									<div>
+										<p className='text-gray-500 mb-1'>Your Share</p>
+										<p className='font-mono text-lg text-red-600'>
+											${youOwe.toFixed(2)}
+										</p>
+									</div>
+								</div>
 							</div>
-						</>
-					)}
-				</div>
+						</div>
+					</motion.div>
+				)}
 
-				<div className='grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8'>
-					<div className='lg:col-span-2'>
+				<div className='grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12'>
+					<div className='lg:col-span-2 space-y-8'>
+						{/* Monthly Overview Chart */}
+						<motion.div
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.5, delay: 0.2 }}
+							className='bg-white rounded-lg border shadow-sm p-6'
+						>
+							<div className='flex items-center justify-between mb-6'>
+								<h2 className='text-lg font-medium text-gray-900'>
+									Monthly Overview
+								</h2>
+								<div className='text-sm text-gray-500'>Last 6 months</div>
+							</div>
+							<div className='w-full'>
+								<ChartContainer
+									config={{
+										expenses: {
+											label: 'Monthly Expenses',
+											theme: {
+												light: '#374151',
+												dark: '#374151',
+											},
+										},
+									}}
+								>
+									<RechartsPrimitive.AreaChart
+										data={filledMonthlyData}
+										margin={{ top: 5, right: 5, left: 40, bottom: 20 }}
+									>
+										<RechartsPrimitive.XAxis
+											dataKey='month'
+											tick={{ fill: '#6B7280', fontSize: 11 }}
+											tickLine={{ stroke: '#6B7280' }}
+											axisLine={{ stroke: '#E5E7EB' }}
+											dy={10}
+										/>
+										<RechartsPrimitive.YAxis
+											tick={{ fill: '#6B7280', fontSize: 11 }}
+											tickLine={{ stroke: '#6B7280' }}
+											axisLine={{ stroke: '#E5E7EB' }}
+											tickFormatter={(value) => `$${value}`}
+											width={35}
+										/>
+										<RechartsPrimitive.CartesianGrid
+											strokeDasharray='3 3'
+											stroke='#E5E7EB'
+											opacity={0.5}
+										/>
+										<RechartsPrimitive.Tooltip
+											content={<ChartTooltipContent />}
+											cursor={{ stroke: '#6B7280', strokeWidth: 1 }}
+										/>
+										<RechartsPrimitive.Area
+											type='monotone'
+											dataKey='amount'
+											name='expenses'
+											stroke='#374151'
+											fill='#374151'
+											fillOpacity={0.1}
+											strokeWidth={2}
+										/>
+									</RechartsPrimitive.AreaChart>
+								</ChartContainer>
+							</div>
+						</motion.div>
+
 						<ActivityFeed activities={activities} members={membersById} />
 					</div>
 					<div>
 						<MemberBalances members={membersWithBalances} />
-					</div>
-				</div>
-				{/* Monthly Overview Chart */}
-				<div className='bg-white rounded-lg border shadow-sm p-6 mb-8'>
-					<div className='flex items-center justify-between mb-6'>
-						<h2 className='text-lg font-semibold text-gray-900'>
-							Monthly Overview
-						</h2>
-						<div className='text-sm text-gray-500'>Last 6 months</div>
-					</div>
-					<div className='w-full'>
-						<ChartContainer
-							config={{
-								expenses: {
-									label: 'Monthly Expenses',
-									theme: {
-										light: '#059669',
-										dark: '#059669',
-									},
-								},
-							}}
-						>
-							<RechartsPrimitive.AreaChart
-								data={filledMonthlyData}
-								margin={{ top: 5, right: 5, left: 40, bottom: 20 }}
-							>
-								<RechartsPrimitive.XAxis
-									dataKey='month'
-									tick={{ fill: '#6B7280', fontSize: 11 }}
-									tickLine={{ stroke: '#6B7280' }}
-									axisLine={{ stroke: '#E5E7EB' }}
-									dy={10}
-								/>
-								<RechartsPrimitive.YAxis
-									tick={{ fill: '#6B7280', fontSize: 11 }}
-									tickLine={{ stroke: '#6B7280' }}
-									axisLine={{ stroke: '#E5E7EB' }}
-									tickFormatter={(value) => `$${value}`}
-									width={35}
-								/>
-								<RechartsPrimitive.CartesianGrid
-									strokeDasharray='3 3'
-									stroke='#E5E7EB'
-									opacity={0.5}
-								/>
-								<RechartsPrimitive.Tooltip
-									content={<ChartTooltipContent />}
-									cursor={{ stroke: '#6B7280', strokeWidth: 1 }}
-								/>
-								<RechartsPrimitive.Area
-									type='monotone'
-									dataKey='amount'
-									name='expenses'
-									stroke='#059669'
-									fill='#059669'
-									fillOpacity={0.1}
-									strokeWidth={2}
-								/>
-							</RechartsPrimitive.AreaChart>
-						</ChartContainer>
 					</div>
 				</div>
 			</div>
