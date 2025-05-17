@@ -4,7 +4,14 @@ import { GroupPageContent } from '@/components/group/group-page-content';
 
 export const dynamic = 'force-dynamic';
 
-const GroupPage = async ({ params }: { params: { groupId: string } }) => {
+interface PageProps {
+	params: {
+		groupId: string;
+	};
+	searchParams: { [key: string]: string | string[] | undefined };
+}
+
+const GroupPage = async ({ params }: PageProps) => {
 	const supabase = createSuperAdminClient();
 
 	// Fetch group data
