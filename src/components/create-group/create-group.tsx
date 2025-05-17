@@ -32,7 +32,7 @@ import {
 	InputOTPSlot,
 } from '@/components/ui/input-otp';
 import { createClient } from '@/lib/supabase/client';
-import { Group, GroupMember } from '@/app/models/Group';
+import { Group, GroupMember } from '@/models/Group';
 import { getRandomId } from '@/lib/string/string';
 import { getTodaysDate } from '@/lib/date/date';
 import { toast } from 'sonner';

@@ -1,6 +1,6 @@
-import Header from './components/header';
+import Header from '../components/header';
 import Typewriter from '@/fancy/components/text/typewriter';
-import CreateGroup from './components/create-group/create-group';
+import CreateGroup from '../components/create-group/create-group';
 
 export default function Home() {
 	return (
