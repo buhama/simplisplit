@@ -36,7 +36,7 @@ export function InviteMemberDialog({ groupId }: InviteMemberDialogProps) {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button variant='outline' size='sm' className='hidden sm:flex'>
+				<Button variant='outline' size='sm' className=''>
 					<UsersIcon className='mr-1 h-4 w-4' />
 					Invite
 				</Button>
