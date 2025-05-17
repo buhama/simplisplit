@@ -4,3 +4,9 @@ export interface Group {
 	passcode?: string;
 	description: string;
 }
+
+export interface GroupMember {
+	id: string;
+	name: string;
+	group_id: string;
+}
