@@ -79,6 +79,7 @@ export function JoinGroupDialog({
 			toast.success('Successfully joined the group');
 			form.reset();
 			onOpenChange(false);
+			window.location.reload();
 		} catch (error) {
 			if (error instanceof Error) {
 				toast.error(error.message);
