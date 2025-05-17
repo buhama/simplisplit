@@ -5,58 +5,31 @@ import {
 	Dialog,
 	DialogContent,
 	DialogDescription,
-	DialogFooter,
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { UsersIcon } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { inviteMember } from '@/actions/member';
+import { UsersIcon, Copy, CheckCircle2 } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
-
-const formSchema = z.object({
-	name: z.string().min(2, 'Name must be at least 2 characters'),
-});
 
 interface InviteMemberDialogProps {
 	groupId: string;
 }
 
 export function InviteMemberDialog({ groupId }: InviteMemberDialogProps) {
-	const form = useForm<z.infer<typeof formSchema>>({
-		resolver: zodResolver(formSchema),
-		defaultValues: {
-			name: '',
-		},
-	});
+	const [copied, setCopied] = useState(false);
+	const shareLink = `${process.env.NEXT_PUBLIC_APP_URL}/group/${groupId}`;
 
-	const onSubmit = async (values: z.infer<typeof formSchema>) => {
+	const copyToClipboard = async () => {
 		try {
-			await inviteMember({
-				groupId,
-				name: values.name,
-			});
-
-			toast.success('Member added successfully');
-			form.reset();
-		} catch (error) {
-			if (error instanceof Error) {
-				toast.error(error.message);
-			} else {
-				toast.error('Failed to add member');
-			}
+			await navigator.clipboard.writeText(shareLink);
+			setCopied(true);
+			toast.success('Link copied to clipboard');
+			setTimeout(() => setCopied(false), 2000);
+		} catch {
+			toast.error('Failed to copy link');
 		}
 	};
 
@@ -70,31 +43,32 @@ export function InviteMemberDialog({ groupId }: InviteMemberDialogProps) {
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Invite a member</DialogTitle>
-					<DialogDescription>Add a new member to your group.</DialogDescription>
+					<DialogTitle>Invite members</DialogTitle>
+					<DialogDescription>
+						Share this link with people you want to invite to your group.
+					</DialogDescription>
 				</DialogHeader>
-				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-						<FormField
-							control={form.control}
-							name='name'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Name</FormLabel>
-									<FormControl>
-										<Input placeholder='John Doe' {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
+				<div className='flex flex-col gap-4'>
+					<div className='flex items-center gap-2'>
+						<Input readOnly value={shareLink} className='flex-1' />
+						<Button
+							variant='outline'
+							size='icon'
+							onClick={copyToClipboard}
+							className='shrink-0'
+						>
+							{copied ? (
+								<CheckCircle2 className='h-4 w-4 text-emerald-700' />
+							) : (
+								<Copy className='h-4 w-4' />
 							)}
-						/>
-						<DialogFooter>
-							<Button type='submit' loading={form.formState.isSubmitting}>
-								Add member
-							</Button>
-						</DialogFooter>
-					</form>
-				</Form>
+						</Button>
+					</div>
+					<p className='text-sm text-muted-foreground'>
+						Anyone with this link (and the passcode) can join your group. The
+						link will never expire.
+					</p>
+				</div>
 			</DialogContent>
 		</Dialog>
 	);
